@@ -29,7 +29,10 @@ async function run() {
     // await client.connect();
 
     app.get('/api/v1/allBooks', async(req, res)  => {
-        const cursor = bookCollections.find();
+        const query = req.query;
+        console.log(query);
+        const cursor = query?.category ? bookCollections.find({category: query.category}) : bookCollections.find();
+        
         const result = await cursor.toArray();
         res.send(result);
     })

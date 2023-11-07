@@ -37,6 +37,13 @@ async function run() {
         res.send(result);
     })
 
+    app.get('/api/v1/allBooks/:id', async (req, res) => {
+      const id = parseInt(req.params.id);
+      const query = {id: id}
+      const book = await bookCollections.findOne(query);
+      res.send(book);
+    })
+
 
 
 

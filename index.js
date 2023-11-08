@@ -10,7 +10,11 @@ const app = express();
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "https://library-management-d2da6.web.app",
+      "https://library-management-d2da6.firebaseapp.com",
+      "http://localhost:5173",
+    ],
     credentials: true,
   })
 );
@@ -60,16 +64,22 @@ async function run() {
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
+      // res
+      //   .cookie("token", token, {
+      //     httpOnly: true,
+      //     secure: false,
+      //     // sameSite: 'none'
+      //   })
+      //   .send({ success: true });
+
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false,
-          // sameSite: 'none'
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
         .send({ success: true });
     });
-
-
 
     // clear cookies
     app.post("/jwt/logout", async (req, res) => {
@@ -78,22 +88,25 @@ async function run() {
 
     // service related api
     app.get("/api/v1/allBooks", verifyToken, async (req, res) => {
-      console.log('quey token', req.query);
-      console.log('quey token', req.user);
-      if(req.user?.email !== req.query?.email) return res.status(403).send({message: 'forbidden access'});
+      console.log("quey token", req.query);
+      console.log("quey token", req.user);
+      if (req.user?.email !== req.query?.email)
+        return res.status(403).send({ message: "forbidden access" });
 
-      const cursor =  bookCollections.find();
+      const cursor = bookCollections.find();
 
       const result = await cursor.toArray();
       res.send(result);
     });
 
     // categorized Books
-    app.get('/api/v1/categorizedBooks', async(req, res) => {
+    app.get("/api/v1/categorizedBooks", async (req, res) => {
       const query = req.query;
-      const result = await bookCollections.find({ category: query?.category}).toArray();
+      const result = await bookCollections
+        .find({ category: query?.category })
+        .toArray();
       res.send(result);
-    })
+    });
 
     app.get("/api/v1/allBooks/:id", async (req, res) => {
       const id = req.params.id;
@@ -109,7 +122,9 @@ async function run() {
       res.send(book);
     });
 
-    app.post("/api/v1/addBook", async (req, res) => {
+    app.post("/api/v1/addBook", verifyToken, async (req, res) => {
+      if (req.user?.email !== req.query?.email)
+        return res.status(403).send({ message: "forbidden access" });
       const book = req.body;
       // console.log(book);
       const result = await bookCollections.insertOne(book);

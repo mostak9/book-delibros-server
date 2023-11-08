@@ -104,6 +104,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/api/v1/borrowBook', async(req, res) => {
+      const query = req.query.email;
+      const result = await borrowCollection.find({email: query}).toArray();
+      res.send(result);
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(

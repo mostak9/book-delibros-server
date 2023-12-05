@@ -14,6 +14,7 @@ app.use(
       "https://library-management-d2da6.web.app",
       "https://library-management-d2da6.firebaseapp.com",
       "http://localhost:5173",
+      "https://rad-bubblegum-8768e9.netlify.app"
     ],
     credentials: true,
   })

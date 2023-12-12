@@ -192,6 +192,26 @@ async function run() {
       res.send(result);
     });
 
+    // add review
+    app.patch('/api/v1/addReview/:id', async(req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      const query = {_id: new ObjectId(id)};
+      const options = { upsert: true };
+      const updateDoc = {
+        $push: {
+          reviews: {
+            review: data.review,
+            name: data.name,
+            img: data.img,
+            
+          }
+        }
+      }
+      const result = await bookCollections.updateOne(query, updateDoc, options);
+      res.send(result)
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
